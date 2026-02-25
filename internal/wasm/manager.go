@@ -40,6 +40,32 @@ func (m *Manager) GetPlugin(name string) (wazero.CompiledModule, bool) {
 	return cm, ok
 }
 
+func (m *Manager) RunGreet(ctx context.Context, name string) error {
+	cm, ok := m.plugins[name]
+	if !ok {
+		return fmt.Errorf("plugin %s not found", name)
+	}
+
+	// Instantiate the module
+	mod, err := m.engine.InstantiateModule(ctx, cm, wazero.NewModuleConfig().WithName(name))
+	if err != nil {
+		return fmt.Errorf("failed to instantiate module: %w", err)
+	}
+	defer mod.Close(ctx)
+
+	greet := mod.ExportedFunction("greet")
+	if greet == nil {
+		return fmt.Errorf("greet function not found in plugin %s", name)
+	}
+
+	_, err = greet.Call(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to call greet: %w", err)
+	}
+
+	return nil
+}
+
 func (m *Manager) Close(ctx context.Context) error {
 	return m.engine.Close(ctx)
 }
