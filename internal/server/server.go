@@ -26,7 +26,7 @@ func New(cfg *config.Config) *Server {
 }
 
 func (s *Server) Start() error {
-	s.router.AddRoute("/health", "self", s.healthHandler)
+	s.router.AddRoute(http.MethodGet, "/health", "self", s.healthHandler)
 
 	s.httpServer = &http.Server{
 		Addr:         fmt.Sprintf(":%d", s.cfg.Server.Port),
@@ -40,10 +40,10 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	route, found := s.router.Match(r.URL.Path)
+	route, found := s.router.Match(r.Method, r.URL.Path)
 	if !found {
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintf(w, "Route not found: %s\n", r.URL.Path)
+		fmt.Fprintf(w, "Route not found: %s %s\n", r.Method, r.URL.Path)
 		return
 	}
 
