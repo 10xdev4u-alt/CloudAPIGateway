@@ -15,17 +15,15 @@ func NewReverseProxy(target string) (*httputil.ReverseProxy, error) {
 		return nil, err
 	}
 
-	proxy := httputil.NewSingleHostReverseProxy(targetURL)
-	
-	// Customize the director to log upstream requests and set host
-	originalDirector := proxy.Director
-	proxy.Director = func(req *http.Request) {
-		originalDirector(req)
-		req.Host = targetURL.Host
-		logger.Log.Debug("Forwarding request",
-			zap.String("target_host", req.URL.Host),
-			zap.String("target_path", req.URL.Path),
-		)
+	proxy := &httputil.ReverseProxy{
+		Rewrite: func(pr *httputil.ProxyRequest) {
+			pr.SetURL(targetURL)
+			pr.Out.Host = targetURL.Host
+			logger.Log.Debug("Forwarding request",
+				zap.String("target_host", pr.Out.URL.Host),
+				zap.String("target_path", pr.Out.URL.Path),
+			)
+		},
 	}
 
 	return proxy, nil
