@@ -21,10 +21,14 @@ import (
 	"github.com/princetheprogrammer/cloud-api-gateway/internal/config"
 	"github.com/princetheprogrammer/cloud-api-gateway/internal/logger"
 	"github.com/princetheprogrammer/cloud-api-gateway/internal/server"
+	"github.com/princetheprogrammer/cloud-api-gateway/internal/wasm"
 	"go.uber.org/zap"
 )
 
 func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
@@ -34,6 +38,18 @@ func main() {
 		log.Fatalf("failed to initialize logger: %v", err)
 	}
 	defer logger.Log.Sync()
+
+	// Initialize Wasm Manager
+	wasmManager := wasm.NewManager(ctx)
+	defer wasmManager.Close(ctx)
+
+	if err := wasmManager.LoadPlugin(ctx, "example", "plugins/example.wasm"); err != nil {
+		logger.Log.Fatal("failed to load example plugin", zap.Error(err))
+	}
+
+	if err := wasmManager.RunGreet(ctx, "example"); err != nil {
+		logger.Log.Error("failed to run greet", zap.Error(err))
+	}
 
 	srv := server.New(cfg)
 
