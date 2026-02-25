@@ -5,8 +5,15 @@ import (
 )
 
 type Config struct {
-	Server ServerConfig `mapstructure:"server"`
-	Log    LogConfig    `mapstructure:"log"`
+	Server ServerConfig  `mapstructure:"server"`
+	Log    LogConfig     `mapstructure:"log"`
+	Routes []RouteConfig `mapstructure:"routes"`
+}
+
+type RouteConfig struct {
+	Method string `mapstructure:"method"`
+	Path   string `mapstructure:"path"`
+	Target string `mapstructure:"target"`
 }
 
 type ServerConfig struct {
