@@ -4,6 +4,6 @@ log:
   level: debug
 routes:
   - method: "GET"
-    path: "/api/test"
-    target: "https://httpbin.org/get"
-    strip_prefix: true
+    path: "/get"
+    target: "https://httpbin.org"
+    strip_prefix: false
