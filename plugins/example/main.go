@@ -1,6 +1,6 @@
 package main
 
-//export greet
+//go:wasmexport greet
 func greet() {
 	println("Hello from Wasm Plugin!")
 }
