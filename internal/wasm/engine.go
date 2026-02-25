@@ -5,6 +5,7 @@ import (
 
 	"github.com/tetratelabs/wazero"
 	"github.com/tetratelabs/wazero/api"
+	"github.com/tetratelabs/wazero/imports/wasi_snapshot_preview1"
 )
 
 type Engine struct {
@@ -12,8 +13,10 @@ type Engine struct {
 }
 
 func NewEngine(ctx context.Context) *Engine {
+	r := wazero.NewRuntime(ctx)
+	wasi_snapshot_preview1.MustInstantiate(ctx, r)
 	return &Engine{
-		runtime: wazero.NewRuntime(ctx),
+		runtime: r,
 	}
 }
 
