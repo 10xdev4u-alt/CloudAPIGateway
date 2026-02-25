@@ -47,7 +47,10 @@ func (m *Manager) RunGreet(ctx context.Context, name string) error {
 	}
 
 	// Instantiate the module
-	mod, err := m.engine.InstantiateModule(ctx, cm, wazero.NewModuleConfig().WithName(name))
+	mod, err := m.engine.InstantiateModule(ctx, cm, wazero.NewModuleConfig().
+		WithName(name).
+		WithStdout(os.Stdout).
+		WithStderr(os.Stderr))
 	if err != nil {
 		return fmt.Errorf("failed to instantiate module: %w", err)
 	}
