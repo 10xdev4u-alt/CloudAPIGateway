@@ -35,7 +35,13 @@ func (s *Server) Start() error {
 			logger.Log.Error("Failed to create proxy for route", zap.String("path", rConfig.Path), zap.Error(err))
 			continue
 		}
-		s.router.AddRoute(rConfig.Method, rConfig.Path, rConfig.Target, p.ServeHTTP)
+
+		var handler http.Handler = p
+		if rConfig.StripPrefix {
+			handler = http.StripPrefix(rConfig.Path, p)
+		}
+
+		s.router.AddRoute(rConfig.Method, rConfig.Path, rConfig.Target, handler.ServeHTTP)
 		logger.Log.Info("Registered route", zap.String("method", rConfig.Method), zap.String("path", rConfig.Path), zap.String("target", rConfig.Target))
 	}
 
