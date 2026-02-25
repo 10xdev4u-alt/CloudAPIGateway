@@ -11,9 +11,10 @@ type Config struct {
 }
 
 type RouteConfig struct {
-	Method string `mapstructure:"method"`
-	Path   string `mapstructure:"path"`
-	Target string `mapstructure:"target"`
+	Method      string `mapstructure:"method"`
+	Path        string `mapstructure:"path"`
+	Target      string `mapstructure:"target"`
+	StripPrefix bool   `mapstructure:"strip_prefix"`
 }
 
 type ServerConfig struct {
