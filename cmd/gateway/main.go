@@ -44,11 +44,11 @@ func main() {
 	defer wasmManager.Close(ctx)
 
 	if err := wasmManager.LoadPlugin(ctx, "example", "plugins/example.wasm"); err != nil {
-		logger.Log.Fatal("failed to load example plugin", zap.Error(err))
-	}
-
-	if err := wasmManager.RunGreet(ctx, "example"); err != nil {
-		logger.Log.Error("failed to run greet", zap.Error(err))
+		logger.Log.Error("failed to load example plugin", zap.Error(err))
+	} else {
+		if err := wasmManager.RunGreet(ctx, "example"); err != nil {
+			logger.Log.Error("failed to run greet", zap.Error(err))
+		}
 	}
 
 	srv := server.New(cfg)
