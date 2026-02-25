@@ -8,6 +8,7 @@ import (
 
 	"github.com/princetheprogrammer/cloud-api-gateway/internal/config"
 	"github.com/princetheprogrammer/cloud-api-gateway/internal/logger"
+	"github.com/princetheprogrammer/cloud-api-gateway/internal/middleware"
 	"github.com/princetheprogrammer/cloud-api-gateway/internal/proxy"
 	"github.com/princetheprogrammer/cloud-api-gateway/internal/router"
 	"go.uber.org/zap"
@@ -45,9 +46,11 @@ func (s *Server) Start() error {
 		logger.Log.Info("Registered route", zap.String("method", rConfig.Method), zap.String("path", rConfig.Path), zap.String("target", rConfig.Target))
 	}
 
+	chain := middleware.NewChain(middleware.Logging())
+	
 	s.httpServer = &http.Server{
 		Addr:         fmt.Sprintf(":%d", s.cfg.Server.Port),
-		Handler:      s,
+		Handler:      chain.Then(s),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
