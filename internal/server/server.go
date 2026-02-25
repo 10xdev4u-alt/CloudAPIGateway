@@ -8,6 +8,7 @@ import (
 
 	"github.com/princetheprogrammer/cloud-api-gateway/internal/config"
 	"github.com/princetheprogrammer/cloud-api-gateway/internal/logger"
+	"github.com/princetheprogrammer/cloud-api-gateway/internal/proxy"
 	"github.com/princetheprogrammer/cloud-api-gateway/internal/router"
 	"go.uber.org/zap"
 )
@@ -27,6 +28,16 @@ func New(cfg *config.Config) *Server {
 
 func (s *Server) Start() error {
 	s.router.AddRoute(http.MethodGet, "/health", "self", s.healthHandler)
+
+	for _, rConfig := range s.cfg.Routes {
+		p, err := proxy.NewReverseProxy(rConfig.Target)
+		if err != nil {
+			logger.Log.Error("Failed to create proxy for route", zap.String("path", rConfig.Path), zap.Error(err))
+			continue
+		}
+		s.router.AddRoute(rConfig.Method, rConfig.Path, rConfig.Target, p.ServeHTTP)
+		logger.Log.Info("Registered route", zap.String("method", rConfig.Method), zap.String("path", rConfig.Path), zap.String("target", rConfig.Target))
+	}
 
 	s.httpServer = &http.Server{
 		Addr:         fmt.Sprintf(":%d", s.cfg.Server.Port),
