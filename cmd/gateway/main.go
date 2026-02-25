@@ -67,10 +67,10 @@ func main() {
 
 	logger.Log.Info("Shutting down Gateway...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutdownCancel()
 
-	if err := srv.Shutdown(ctx); err != nil {
+	if err := srv.Shutdown(shutdownCtx); err != nil {
 		logger.Log.Fatal("Gateway shutdown failed", zap.Error(err))
 	}
 
